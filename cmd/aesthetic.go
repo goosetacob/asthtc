@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/goosetacob/asthtc/backend"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +26,7 @@ var aestheticCmd = &cobra.Command{
 	Use:   "aesthetic",
 	Short: "make a statement with ~ a e s t h e t i c ~",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		aestheticStatement, err := makeItAesthetic(args)
+		aestheticStatement, err := tool.MakeItAesthetic(args)
 		if err != nil {
 			return err
 		}
@@ -33,21 +34,6 @@ var aestheticCmd = &cobra.Command{
 		fmt.Println(aestheticStatement)
 		return nil
 	},
-}
-
-func makeItAesthetic(unaesthetic []string) (string, error) {
-	if len(unaesthetic) == 0 {
-		return "", fmt.Errorf("need statement to make aesthetic")
-	}
-	aesthetic := []rune{'~', ' '}
-	for _, word := range unaesthetic {
-		for _, letter := range word {
-			aesthetic = append(aesthetic, letter, ' ')
-		}
-	}
-	aesthetic = append(aesthetic, '~')
-
-	return string(aesthetic), nil
 }
 
 func init() {

@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/goosetacob/asthtc/backend"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +26,7 @@ var vowelessCmd = &cobra.Command{
 	Use:   "voweless",
 	Short: "make a statement without vowls",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		aestheticStatement, err := makeItVoweless(args)
+		aestheticStatement, err := tool.MakeItVoweless(args)
 		if err != nil {
 			return err
 		}
@@ -35,36 +36,6 @@ var vowelessCmd = &cobra.Command{
 	},
 }
 
-func makeItVoweless(unaesthetic []string) (string, error) {
-	if len(unaesthetic) == 0 {
-		return "", fmt.Errorf("need statement to make voweless")
-	}
-
-	var voweless []rune
-	for _, word := range unaesthetic {
-		for _, letter := range word {
-			switch letter {
-			case 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U':
-				continue
-			default:
-				voweless = append(voweless, letter)
-			}
-		}
-	}
-
-	return string(voweless), nil
-}
-
 func init() {
 	rootCmd.AddCommand(vowelessCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// vowelessCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// vowelessCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
