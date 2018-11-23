@@ -18,9 +18,11 @@ import (
 	"fmt"
 	"os"
 
+	pb "github.com/goosetacob/asthtc/api"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc"
 )
 
 var cfgFile string
@@ -28,17 +30,10 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "asthtc",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Short: "CLI to interact with asthtc backend",
 }
+
+var client pb.ToolsClient
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -50,7 +45,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initConfig, initToolsClient)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
@@ -86,4 +81,15 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func initToolsClient() {
+	backend := "localhost:80"
+
+	conn, err := grpc.Dial(backend, grpc.WithInsecure())
+	if err != nil {
+		fmt.Printf("Could not connect to service at %v: %v\n", backend, err)
+	}
+
+	client = pb.NewToolsClient(conn)
 }

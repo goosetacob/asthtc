@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/goosetacob/asthtc/cmd"
+import "github.com/goosetacob/asthtc/cli/cmd"
 
 func main() {
 	cmd.Execute()

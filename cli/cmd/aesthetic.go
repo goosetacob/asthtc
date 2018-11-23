@@ -15,9 +15,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/goosetacob/asthtc/backend"
+	pb "github.com/goosetacob/asthtc/api"
 	"github.com/spf13/cobra"
 )
 
@@ -26,16 +27,24 @@ var aestheticCmd = &cobra.Command{
 	Use:   "aesthetic",
 	Short: "make a statement with ~ a e s t h e t i c ~",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		aestheticStatement, err := tool.MakeItAesthetic(args)
+		phrase, err := cmd.Flags().GetString("phrase")
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(aestheticStatement)
+		job := &pb.AestheticJob{Phrase: phrase}
+		res, err := client.Aesthetic(context.Background(), job)
+		if err != nil {
+			return fmt.Errorf("Could not make %v aesthetic: %v", job.Phrase, err)
+		}
+
+		fmt.Println(res.Phrase)
 		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(aestheticCmd)
+	aestheticCmd.Flags().StringP("phrase", "p", "", "phrase to make voweless")
+	aestheticCmd.MarkFlagRequired("phrase")
 }

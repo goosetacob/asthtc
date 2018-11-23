@@ -6,36 +6,49 @@ dumb tool i made because i was boread listening to mac demarco and wanted to che
 go get github.com/goosetacob/asthtc
 ```
 
+## backend setup
+```bash
+# optional: build api/tool.pb.go if not present
+$ make go-rpc
+
+# build docker image
+$ make backend-image
+
+# run container
+$ make backend-container
+```
+
 ## cli usage
 #### add spaces and pre/post apend with ~
 ```bash
-$ asthtc aesthetic goosetacob
+$ go run cli/main.go aesthetic --phrase 'goosetacob'
 ~ g o o s e t a c o b ~
 
-$ asthtc aesthetic los angeles
+$ go run cli/main.go aesthetic --phrase 'los angeles'
 ~ l o s a n g e l e s ~
 ```
 #### remove vowels from phrase
 ```bash
-$ asthtc voweless goosetacob
+$ go run cli/main.go voweless --phrase 'goosetacob'
 gstcb
 
-$ asthtc voweless los angeles
+$ go run cli/main.go voweless --phrase 'los angeles'
 lsngls
 ```
 #### compute the [de bruijn sequence](https://en.wikipedia.org/wiki/De_Bruijn_sequence#Algorithmhttps://en.wikipedia.org/wiki/De_Bruijn_sequence#Algorithm) given order n and slphabet k
 ```bash
-$ asthtc deBruijn --alphabet "01" --subSequenceSize 8
+$ go run cli/main.go --alphabet "01" --subSequenceSize 8
 00010111
 
-$ asthtc deBruijn -a "abcd" -s 2
+$ go run cli/main.go -a "abcd" -s 2
 aabacadbbcbdccdd
 ```
 
 ## todo
-- add gRPC to communicate between CLI and backend
+- ~~add gRPC to communicate between CLI and backend~~
 - add [grpc gateway](https://github.com/grpc-ecosystem/grpc-gateway) to keep RESTful JSON API
 - figure out how to run backend/resource/tool_test.go
 - auto dump into pbcopy (or xsel for linux) when in CLI
 - figure out autocomplete for this
 - something actually useful (finish implementing De Bruijn Sequence)?
+- probably a few memory leaks around connections in CLI, figure out how to close those

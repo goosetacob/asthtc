@@ -15,9 +15,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/goosetacob/asthtc/backend"
+	pb "github.com/goosetacob/asthtc/api"
 	"github.com/spf13/cobra"
 )
 
@@ -26,16 +27,24 @@ var vowelessCmd = &cobra.Command{
 	Use:   "voweless",
 	Short: "make a statement without vowls",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		aestheticStatement, err := tool.MakeItVoweless(args)
+		phrase, err := cmd.Flags().GetString("phrase")
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(aestheticStatement)
+		job := &pb.VowelessJob{Phrase: phrase}
+		res, err := client.Voweless(context.Background(), job)
+		if err != nil {
+			return fmt.Errorf("Could not make %v voweless: %v", job.Phrase, err)
+		}
+
+		fmt.Println(res.Phrase)
 		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(vowelessCmd)
+	vowelessCmd.Flags().StringP("phrase", "p", "", "phrase to make voweless")
+	vowelessCmd.MarkFlagRequired("phrase")
 }

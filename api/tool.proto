@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package asthtc;
+
+service Tools {
+    rpc Voweless(VowelessJob) returns(Response) {}
+    rpc Aesthetic(AestheticJob) returns(Response) {}
+    rpc DeBruijn(DeBruijnJob) returns(Response) {}
+}
+
+message VowelessJob {
+    string Phrase = 1;
+}
+
+message AestheticJob {
+    string Phrase = 1;
+}
+
+message DeBruijnJob {
+    string Alphabet = 1;
+    int32 SubSequenceSize = 2;
+}
+
+message Response {
+    string Phrase = 1;
+}

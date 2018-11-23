@@ -15,9 +15,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/goosetacob/asthtc/backend"
+	pb "github.com/goosetacob/asthtc/api"
 	"github.com/spf13/cobra"
 )
 
@@ -34,13 +35,19 @@ var deBruijnCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		deBruijnSequence, err := tool.MakeItDeBruijn(alphabet, subSequenceSize)
+
+		job := &pb.DeBruijnJob{
+			Alphabet:        alphabet,
+			SubSequenceSize: int32(subSequenceSize),
+		}
+		res, err := client.DeBruijn(context.Background(), job)
 		if err != nil {
-			return err
+			return fmt.Errorf("Could not make DeBruijn sequence from alphabet %v and sub sequence size %v, %v", alphabet, subSequenceSize, err)
 		}
 
-		fmt.Println(deBruijnSequence)
+		fmt.Println(res.Phrase)
 		return nil
+
 	},
 }
 

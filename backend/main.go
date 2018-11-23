@@ -1,17 +1,20 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/goosetacob/asthtc/backend/resource"
-	"github.com/gorilla/mux"
+
+	"github.com/Sirupsen/logrus"
+	pb "github.com/goosetacob/asthtc/api"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
-var port string
+var portAddress string
 
 func init() {
 	// configure logrus timestamp
@@ -21,14 +24,14 @@ func init() {
 	logrus.SetFormatter(customFormatter)
 
 	// configure port address
-	portAddress := os.Getenv("PORT")
+	port := os.Getenv("PORT")
 	switch len(port) {
 	case 0:
 		logrus.Println("Environment variable PORT is undefined. Using port :80 by default")
-		port = ":80"
+		portAddress = ":80"
 	case 1:
 		logrus.Printf("Environment variable PORT=\"%s\"", port)
-		port = ":" + portAddress
+		portAddress = ":" + port
 	}
 }
 
@@ -42,72 +45,39 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
-	r := mux.NewRouter()
+	lis, err := net.Listen("tcp", portAddress)
+	if err != nil {
+		logrus.Fatalf("could not listen on port %d: %v", portAddress, err)
+	}
 
-	r.HandleFunc("/tool/voweless", func(w http.ResponseWriter, r *http.Request) {
-		type vowelessJob struct {
-			Phrase string `json:"phrase"`
-		}
+	s := grpc.NewServer()
+	pb.RegisterToolsServer(s, server{})
+	if err := s.Serve(lis); err != nil {
+		logrus.Fatalf("could not serve: %v", err)
+	}
+}
 
-		var job vowelessJob
-		var err error
-		if err = json.NewDecoder(r.Body).Decode(&job); err != nil {
-			logrus.Error(err)
-			fmt.Fprintf(w, "%v", err)
-		}
+type server struct{}
 
-		var response string
-		if response, err = tool.Voweless(job.Phrase); err != nil {
-			logrus.Error(err)
-			fmt.Fprintf(w, "%v", err)
-		}
+func (server) Voweless(ctx context.Context, job *pb.VowelessJob) (*pb.Response, error) {
+	vowelessPhrase, err := tool.Voweless(job.Phrase)
+	if err != nil {
+		return nil, err
+	}
 
-		fmt.Fprintf(w, "Phrase: %v\nResponse: %v\n", job.Phrase, response)
-	}).Methods("POST")
+	res := &pb.Response{Phrase: vowelessPhrase}
+	return res, nil
+}
 
-	r.HandleFunc("/tool/aesthetic", func(w http.ResponseWriter, r *http.Request) {
-		type aestheticJob struct {
-			Phrase string `json:"phrase"`
-		}
+func (server) Aesthetic(ctx context.Context, job *pb.AestheticJob) (*pb.Response, error) {
+	aestheticPhrase, err := tool.Aesthetic(job.Phrase)
+	if err != nil {
+		return nil, err
+	}
 
-		var job aestheticJob
-		var err error
-		if err = json.NewDecoder(r.Body).Decode(&job); err != nil {
-			logrus.Error(err)
-			fmt.Fprintf(w, "%v", err)
-		}
+	return &pb.Response{Phrase: aestheticPhrase}, nil
+}
 
-		var response string
-		if response, err = tool.Aesthetic(job.Phrase); err != nil {
-			logrus.Error(err)
-			fmt.Fprintf(w, "%v", err)
-		}
-
-		fmt.Fprintf(w, "Phrase: %v\nResponse: %v\n", job.Phrase, response)
-	}).Methods("POST")
-
-	r.HandleFunc("/tool/debruijn", func(w http.ResponseWriter, r *http.Request) {
-		type debruijnJob struct {
-			Alphabet        string `json:"alphabet"`
-			SubSequenceSize int    `json:"subSequenceSize"`
-		}
-
-		var job debruijnJob
-		var err error
-		if err = json.NewDecoder(r.Body).Decode(&job); err != nil {
-			logrus.Error(err)
-			fmt.Fprintf(w, "%v", err)
-		}
-
-		var response string
-		if response, err = tool.DeBruijn(job.Alphabet, job.SubSequenceSize); err != nil {
-			logrus.Error(err)
-			fmt.Fprintf(w, "%v", err)
-		}
-
-		fmt.Fprintf(w, "Alphabet: %v\nSubSequenceSize: %v\nResponse: %v\n", job.Alphabet, job.SubSequenceSize, response)
-	}).Methods("POST")
-
-	r.Use(loggingMiddleware)
-	http.ListenAndServe(port, r)
+func (server) DeBruijn(ctx context.Context, job *pb.DeBruijnJob) (*pb.Response, error) {
+	return nil, fmt.Errorf("not implemented")
 }
