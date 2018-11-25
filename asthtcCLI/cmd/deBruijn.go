@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/goosetacob/asthtc/api"
+	"github.com/goosetacob/asthtc/proto/toolsService"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +36,7 @@ var deBruijnCmd = &cobra.Command{
 			return err
 		}
 
-		job := &pb.DeBruijnJob{
+		job := &toolsService.DeBruijnJob{
 			Alphabet:        alphabet,
 			SubSequenceSize: int32(subSequenceSize),
 		}

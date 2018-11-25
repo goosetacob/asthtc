@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	pb "github.com/goosetacob/asthtc/api"
+	"github.com/goosetacob/asthtc/proto/toolsService"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,7 +33,7 @@ var rootCmd = &cobra.Command{
 	Short: "CLI to interact with asthtc backend",
 }
 
-var client pb.ToolsClient
+var client toolsService.ToolsClient
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -91,5 +91,5 @@ func initToolsClient() {
 		fmt.Printf("Could not connect to service at %v: %v\n", backend, err)
 	}
 
-	client = pb.NewToolsClient(conn)
+	client = toolsService.NewToolsClient(conn)
 }

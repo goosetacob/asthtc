@@ -1,16 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
-	"net/http"
 	"os"
 
-	"github.com/goosetacob/asthtc/backend/resource"
-
 	"github.com/Sirupsen/logrus"
-	pb "github.com/goosetacob/asthtc/api"
-	"golang.org/x/net/context"
+	"github.com/goosetacob/asthtc/backend/resource"
+	"github.com/goosetacob/asthtc/proto/toolsService"
 	"google.golang.org/grpc"
 )
 
@@ -35,23 +33,15 @@ func init() {
 	}
 }
 
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Do stuff here
-		logrus.Println(r.RequestURI)
-		// Call the next handler, which can be another middleware in the chain, or the final handler.
-		next.ServeHTTP(w, r)
-	})
-}
-
 func main() {
 	lis, err := net.Listen("tcp", portAddress)
+	defer lis.Close()
 	if err != nil {
 		logrus.Fatalf("could not listen on port %d: %v", portAddress, err)
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterToolsServer(s, server{})
+	toolsService.RegisterToolsServer(s, server{})
 	if err := s.Serve(lis); err != nil {
 		logrus.Fatalf("could not serve: %v", err)
 	}
@@ -59,25 +49,25 @@ func main() {
 
 type server struct{}
 
-func (server) Voweless(ctx context.Context, job *pb.VowelessJob) (*pb.Response, error) {
+func (server) Voweless(ctx context.Context, job *toolsService.VowelessJob) (*toolsService.Response, error) {
 	vowelessPhrase, err := tool.Voweless(job.Phrase)
 	if err != nil {
 		return nil, err
 	}
 
-	res := &pb.Response{Phrase: vowelessPhrase}
+	res := &toolsService.Response{Phrase: vowelessPhrase}
 	return res, nil
 }
 
-func (server) Aesthetic(ctx context.Context, job *pb.AestheticJob) (*pb.Response, error) {
+func (server) Aesthetic(ctx context.Context, job *toolsService.AestheticJob) (*toolsService.Response, error) {
 	aestheticPhrase, err := tool.Aesthetic(job.Phrase)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.Response{Phrase: aestheticPhrase}, nil
+	return &toolsService.Response{Phrase: aestheticPhrase}, nil
 }
 
-func (server) DeBruijn(ctx context.Context, job *pb.DeBruijnJob) (*pb.Response, error) {
+func (server) DeBruijn(ctx context.Context, job *toolsService.DeBruijnJob) (*toolsService.Response, error) {
 	return nil, fmt.Errorf("not implemented")
 }

@@ -1,52 +1,78 @@
 # ~ a s t h t c ~
 dumb tool i made because i was boread listening to mac demarco and wanted to checkout [cobraCLI](https://github.com/spf13/cobra)
 
-## install
+## get all the stuff
 ```bash
-go get github.com/goosetacob/asthtc
+$ go get -d github.com/goosetacob/asthtc
 ```
 
-## backend setup
+## backend
+### setup
 ```bash
-# optional: build api/tool.pb.go if not present
-$ make go-rpc
+# go to the code
+$ cd $GOPATH/src/github.com/goosetacob/asthtc
 
-# build docker image
-$ make backend-image
+# (optional if go source in proto/ is bad) build api/tool.pb.go
+$ make grpc-go-source
 
-# run container
-$ make backend-container
+# build docker images
+$ make images
+
+# run backend container
+$ make backend-run
 ```
 
-## cli usage
+## asthtcCLI
+### install
+```bash
+$ go install ./asthtcCLI
+```
+### usage
 #### add spaces and pre/post apend with ~
 ```bash
-$ go run cli/main.go aesthetic --phrase 'goosetacob'
+$ asthtcCLI aesthetic --phrase 'goosetacob'
 ~ g o o s e t a c o b ~
 
-$ go run cli/main.go aesthetic --phrase 'los angeles'
+$ asthtcCLI aesthetic --phrase 'los angeles'
 ~ l o s a n g e l e s ~
 ```
 #### remove vowels from phrase
 ```bash
-$ go run cli/main.go voweless --phrase 'goosetacob'
+$ asthtcCLI voweless --phrase 'goosetacob'
 gstcb
 
-$ go run cli/main.go voweless --phrase 'los angeles'
+$ asthtcCLI voweless --phrase 'los angeles'
 lsngls
 ```
 #### compute the [de bruijn sequence](https://en.wikipedia.org/wiki/De_Bruijn_sequence#Algorithmhttps://en.wikipedia.org/wiki/De_Bruijn_sequence#Algorithm) given order n and slphabet k
 ```bash
-$ go run cli/main.go --alphabet "01" --subSequenceSize 8
+$ asthtcCLI --alphabet "01" --subSequenceSize 8
 00010111
 
-$ go run cli/main.go -a "abcd" -s 2
+$ asthtcCLI -a "abcd" -s 2
 aabacadbbcbdccdd
+```
+
+## JSON over HTTP
+### setup
+need reverse-proxy to transtalte JSON/HTTP to RPC/HTTP
+```bash
+$ make reverse-proxy-run
+```
+### usage
+#### remove vowels from phrase
+```bash
+$ curl -d '{"Phrase":"los angeles"}' -H "Content-Type: application/json" -XPOST http://localhost:8080/v1/voweless
+gstcb
+
+$ curl -d '{"Phrase":"goosetacob"}' -H "Content-Type: application/json" -XPOST http://localhost:8080/v1/voweless
+{"Phrase":"gstcb"}
 ```
 
 ## todo
 - ~~add gRPC to communicate between CLI and backend~~
-- add [grpc gateway](https://github.com/grpc-ecosystem/grpc-gateway) to keep RESTful JSON API
+- ~~add [grpc gateway](https://github.com/grpc-ecosystem/grpc-gateway) to keep RESTful JSON API as an option~~
+    - figure out why [tools.swagger.json](proto/toolsService/tools.swagger.json) looks wrong
 - figure out how to run backend/resource/tool_test.go
 - auto dump into pbcopy (or xsel for linux) when in CLI
 - figure out autocomplete for this

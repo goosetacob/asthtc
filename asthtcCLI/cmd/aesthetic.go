@@ -18,24 +18,24 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/goosetacob/asthtc/api"
+	"github.com/goosetacob/asthtc/proto/toolsService"
 	"github.com/spf13/cobra"
 )
 
-// vowelessCmd represents the voweless command
-var vowelessCmd = &cobra.Command{
-	Use:   "voweless",
-	Short: "make a statement without vowls",
+// aestheticCmd represents the aesthetic command
+var aestheticCmd = &cobra.Command{
+	Use:   "aesthetic",
+	Short: "make a statement with ~ a e s t h e t i c ~",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		phrase, err := cmd.Flags().GetString("phrase")
 		if err != nil {
 			return err
 		}
 
-		job := &pb.VowelessJob{Phrase: phrase}
-		res, err := client.Voweless(context.Background(), job)
+		job := &toolsService.AestheticJob{Phrase: phrase}
+		res, err := client.Aesthetic(context.Background(), job)
 		if err != nil {
-			return fmt.Errorf("Could not make %v voweless: %v", job.Phrase, err)
+			return fmt.Errorf("Could not make %v aesthetic: %v", job.Phrase, err)
 		}
 
 		fmt.Println(res.Phrase)
@@ -44,7 +44,7 @@ var vowelessCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(vowelessCmd)
-	vowelessCmd.Flags().StringP("phrase", "p", "", "phrase to make voweless")
-	vowelessCmd.MarkFlagRequired("phrase")
+	rootCmd.AddCommand(aestheticCmd)
+	aestheticCmd.Flags().StringP("phrase", "p", "", "phrase to make voweless")
+	aestheticCmd.MarkFlagRequired("phrase")
 }

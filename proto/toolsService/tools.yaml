@@ -1,0 +1,8 @@
+---
+type: google.api.Service
+config_version: 3
+http:
+  rules:
+    - selector: toolsService.Tools.Voweless
+      post: /v1/voweless
+      body: "*"
