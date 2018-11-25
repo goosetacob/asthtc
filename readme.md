@@ -12,7 +12,7 @@ $ go get -d github.com/goosetacob/asthtc
 # go to the code
 $ cd $GOPATH/src/github.com/goosetacob/asthtc
 
-# (optional if go source in proto/ is bad) build api/tool.pb.go
+# (optional if go source in proto/ is bad) build api/tool.pb.go etc...
 $ make grpc-go-source
 
 # build docker images
@@ -63,7 +63,7 @@ $ make reverse-proxy-run
 #### remove vowels from phrase
 ```bash
 $ curl -d '{"Phrase":"los angeles"}' -H "Content-Type: application/json" -XPOST http://localhost:8080/v1/voweless
-gstcb
+{"Phrase":"lsngls"}
 
 $ curl -d '{"Phrase":"goosetacob"}' -H "Content-Type: application/json" -XPOST http://localhost:8080/v1/voweless
 {"Phrase":"gstcb"}
